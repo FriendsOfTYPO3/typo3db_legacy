@@ -1,6 +1,6 @@
 {
-  "name": "friendsoftypo3/typo3db-legacy",
-  "type": "typo3-cms-extension",
+	"name": "friendsoftypo3/typo3db-legacy",
+	"type": "typo3-cms-extension",
 	"description": "TYPO3_DB compatibility layer for TYPO3 v9.x",
 	"homepage": "https://typo3.org",
 	"license": ["GPL-2.0+"],
