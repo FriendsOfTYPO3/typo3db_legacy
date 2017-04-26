@@ -28,11 +28,29 @@ If an extension should be compatible with both TYPO3 v8 and TYPO3 v9 and relies 
 on typo3db_legacy, it should list typo3db_legacy as 'suggests' dependency in it's
 ext_emconf.php file. This way, the dependency is optional and needs to be manually loaded
 by an administrator in the TYPO3 v9 backend, but the core still ensures typo3db_legacy is loaded
-before the affected extension.
+before the affected extension:
 
-Extensions that drop support for TYPO3 v8 (or keep separate branches) and did not migrate
-to doctrine in their v9 version, should list typo3db_legacy in the 'requires' section of
-ext_emconf.php
+```
+    'constraints' => [
+        ...
+        'suggests' => [
+            'typo3db_legacy' => '1.0.0-1.0.99',
+        ],
+    ],
+```
+
+Extensions that dropped support for TYPO3 v8 (or keeps separate branches) and did not migrate
+to doctrine in its v9 version, should list typo3db_legacy in the 'depends' section of
+ext_emconf.php:
+
+```
+    'constraints' => [
+        ...
+        'depends' => [
+            'typo3db_legacy' => '1.0.0-1.0.99',
+        ],
+    ],
+```
 
 ## Configuration
 The extension consumes the same 'Default' configuration from TYPO3_CONF_VARS as the
