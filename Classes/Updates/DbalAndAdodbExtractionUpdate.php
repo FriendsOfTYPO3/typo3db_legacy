@@ -101,10 +101,11 @@ class DbalAndAdodbExtractionUpdate extends AbstractDownloadExtensionUpdate
     public function performUpdate(array &$databaseQueries, &$customMessage)
     {
         $requestParams = GeneralUtility::_GP('install');
-        if (!isset($requestParams['values']['TYPO3\CMS\Install\Updates\DbalAndAdodbExtractionUpdate']['install'])) {
+        $identifier = get_class($this);
+        if (!isset($requestParams['values'][$identifier]['install'])) {
             return false;
         }
-        $install = (int)$requestParams['values']['TYPO3\CMS\Install\Updates\DbalAndAdodbExtractionUpdate']['install'];
+        $install = (int)$requestParams['values'][$identifier]['install'];
 
         if ($install === 1) {
             // user decided to install extensions, install and mark wizard as done
