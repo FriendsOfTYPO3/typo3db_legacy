@@ -1878,7 +1878,7 @@ class DatabaseConnection
             GeneralUtility::SYSLOG_SEVERITY_ERROR
         );
         // Send to devLog if enabled
-        if (TYPO3_DLOG) {
+        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_div.php']['devLog'])) {
             $debugLogData = [
                 'SQL Error' => $this->sql_error(),
                 'Backtrace' => $trace
