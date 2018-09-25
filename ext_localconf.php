@@ -2,7 +2,7 @@
 defined('TYPO3_MODE') or die();
 
 call_user_func(function () {
-    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update'][\TYPO3\CMS\Typo3DbLegacy\Updates\DbalAndAdodbExtractionUpdate::class]
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['dbalAndAdodbExtraction']
         = \TYPO3\CMS\Typo3DbLegacy\Updates\DbalAndAdodbExtractionUpdate::class;
 
     // Initialize database connection in $GLOBALS and connect
