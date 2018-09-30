@@ -1,4 +1,5 @@
 <?php
+
 namespace TYPO3\CMS\Typo3DbLegacy\Updates;
 
 /*
@@ -14,8 +15,10 @@ namespace TYPO3\CMS\Typo3DbLegacy\Updates;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Install\Updates\AbstractDownloadExtensionUpdate;
+use TYPO3\CMS\Install\Updates\Confirmation;
+use TYPO3\CMS\Install\Updates\ExtensionModel;
 
 /**
  * Installs and downloads EXT:adodb and EXT:dbal
@@ -23,102 +26,130 @@ use TYPO3\CMS\Install\Updates\AbstractDownloadExtensionUpdate;
 class DbalAndAdodbExtractionUpdate extends AbstractDownloadExtensionUpdate
 {
     /**
-     * @var string
+     * @var \TYPO3\CMS\Install\Updates\Confirmation
      */
-    protected $title = '[Optional] Install extensions "dbal" and "adodb" from TER.';
+    protected $confirmation;
 
     /**
-     * @var array
+     * @var ExtensionModel
      */
-    protected $extensionDetails = [
-        'adodb' => [
-            'title' => 'ADOdb',
-            'description' => 'Adds ADOdb to TYPO3',
-            'versionString' => '8.4.0',
-        ],
-        'dbal' => [
-            'title' => 'dbal',
-            'description' => 'Adds old database abstraction layer to TYPO3',
-            'versionString' => '8.4.0',
-        ]
-    ];
+    protected $adodb;
 
     /**
-     * Checks if an update is needed
-     *
-     * @param string $description The description for the update
-     * @return bool Whether an update is needed (true) or not (false)
+     * @var ExtensionModel
      */
-    public function checkForUpdate(&$description)
+    protected $dbal;
+
+    public function __construct()
     {
-        $description = 'The extensions "dbal" and "adodb" have been extracted to'
-            . ' the TYPO3 Extension Repository. This update downloads the TYPO3 Extension from the TER'
-            . ' if the two extensions are still needed.';
+        $this->adodb = new ExtensionModel(
+            'adodb',
+            'ADOdb',
+            '8.4.0',
+            'friendsoftypo3/adodb',
+            'Adds ADOdb to TYPO3'
+        );
 
-        return !$this->isWizardDone();
+        $this->dbal = new ExtensionModel(
+            'dbal',
+            'dbal',
+            '8.4.0',
+            'friendsoftypo3/dbal',
+            'Adds old database abstraction layer to TYPO3'
+        );
+
+        $this->confirmation = new Confirmation(
+            'Are you sure?',
+            'You should install EXT:adodb and EXT:dbal only if you really need it.'
+            . ' This update wizard cannot check if the extension was installed before the update.'
+            . ' Are you really sure, you want to install these two extensions?'
+            . ' They are only needed if this instance connects to a database server that is NOT MySQL'
+            . ' and if an active extension uses extension typo3db_legacy and a table mapping for EXT:dbal'
+            . ' is configured.'
+            . ' Loading these two extensions is a rather seldom exceptions, the vast majority of'
+            . ' instances should say "no" here.',
+            false
+        );
+    }
+
+
+    /**
+     * Return a confirmation message instance
+     *
+     * @return \TYPO3\CMS\Install\Updates\Confirmation
+     */
+    public function getConfirmation(): Confirmation
+    {
+        return $this->confirmation;
+    }
+
+
+    /**
+     * Return the identifier for this wizard
+     * This should be the same string as used in the ext_localconf class registration
+     *
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return 'dbalAndAdodbExtraction';
     }
 
     /**
-     * Second step: Ask user to install the extensions
+     * Return the speaking name of this wizard
      *
-     * @param string $inputPrefix input prefix, all names of form fields have to start with this. Append custom name in [ ... ]
-     * @return string HTML output
+     * @return string
      */
-    public function getUserInput($inputPrefix)
+    public function getTitle(): string
     {
-        return '
-            <div class="panel panel-danger">
-                <div class="panel-heading">Are you really sure?</div>
-                <div class="panel-body">
-                    <p>You should install EXT:adodb and EXT:dbal only if you really need it.</p>
-                    <p>This update wizard cannot check if the extension was installed before the update.</p>
-                    <p>Are you really sure, you want to install these two extensions?</p>
-                    <p>They are only needed if this instance connects to a database server that is NOT MySQL
-                    and if an active extension uses extension typo3db_legacy and a table mapping for EXT:dbal
-                    is configured.</p>
-                    <p>Loading these two extensions is a rather seldom exceptions, the vast majority of
-                    instances should say "no" here.</p>
-                    <div class="btn-group clearfix" data-toggle="buttons">
-                        <label class="btn btn-default active">
-                            <input type="radio" name="' . $inputPrefix . '[install]" value="0" checked="checked" /> no, don\'t install
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="radio" name="' . $inputPrefix . '[install]" value="1" /> yes, please install
-                        </label>
-                    </div>
-                </div>
-            </div>
-        ';
+        return '[Optional] Install extensions "dbal" and "adodb" from TER.';
     }
 
     /**
-     * Fetch and enable ext:adodb and ext:dbal
+     * Return the description for this wizard
      *
-     * @param array $databaseQueries Queries done in this update
-     * @param string $customMessage Custom message
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return 'The extensions "dbal" and "adodb" have been extracted to'
+               . ' the TYPO3 Extension Repository. This update downloads the TYPO3 Extension from the TER'
+               . ' if the two extensions are still needed.';
+    }
+
+    /**
+     * Is an update necessary?
+     * Is used to determine whether a wizard needs to be run.
+     *
      * @return bool
      */
-    public function performUpdate(array &$databaseQueries, &$customMessage)
+    public function updateNecessary(): bool
     {
-        $requestParams = GeneralUtility::_GP('install');
-        if (!isset($requestParams['values']['TYPO3\CMS\Install\Updates\DbalAndAdodbExtractionUpdate']['install'])) {
-            return false;
-        }
-        $install = (int)$requestParams['values']['TYPO3\CMS\Install\Updates\DbalAndAdodbExtractionUpdate']['install'];
+        return !ExtensionManagementUtility::isLoaded($this->dbal->getKey()) ||
+               !ExtensionManagementUtility::isLoaded($this->adodb->getKey());
+    }
 
-        if ($install === 1) {
-            // user decided to install extensions, install and mark wizard as done
-            $adodbSuccessful = $this->installExtension('adodb', $customMessage);
-            $dbalSuccessful = $this->installExtension('dbal', $customMessage);
-            if ($adodbSuccessful && $dbalSuccessful) {
-                $this->markWizardAsDone();
-                return true;
-            }
-        } else {
-            // user decided to not install extension, mark wizard as done
-            $this->markWizardAsDone();
-            return true;
-        }
-        return false;
+
+    /**
+     * Execute the update
+     * Called when a wizard reports that an update is necessary
+     *
+     * @return bool
+     */
+    public function executeUpdate(): bool
+    {
+        return $this->installExtension($this->dbal) && $this->installExtension($this->adodb);
+    }
+
+    /**
+     * Returns an array of class names of Prerequisite classes
+     * This way a wizard can define dependencies like "database up-to-date" or
+     * "reference index updated"
+     *
+     * @return string[]
+     */
+    public function getPrerequisites(): array
+    {
+        return [];
     }
 }
