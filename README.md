@@ -67,8 +67,8 @@ Feel free to submit any pull request, or add documentation, tests, as you please
 We will publish a new version every once in a while, depending on the amount of changes
 and pull requests submitted.
 
-If you want to keep adding features, and keep HtmlArea compatible with the latest
-browser versions, and TYPO3 versions, feel free to contact Benni Mack.
+If you want to keep adding features, and keep typo3db_legacy compatible with the latest
+TYPO3 versions, feel free to contact Benni Mack.
 
 ## License
 The extension is published under GPL v2+, all included third-party libraries are
