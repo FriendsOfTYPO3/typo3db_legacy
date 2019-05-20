@@ -17,8 +17,8 @@ compatible layer for extensions.
 With TYPO3 v9, the old $GLOBALS['TYPO3_DB'] based database API has been extracted
 from the core to this extension "typo3db_legacy". It provides the same functionality
 as what has been supported by the core in v8 and can be used as a backwards
-compatible layer for extensions that still did not move to the new doctrine based API,
-so those extensions still work with TYPO3 v9.
+compatible layer for extensions that still did not move to the new doctrine based API.
+So those extensions still work with TYPO3 v9.
 
 ## Installation
 The latest version can be installed via TER (http://typo3.org) or via composer
@@ -47,19 +47,19 @@ ext_emconf.php:
     'constraints' => [
         ...
         'depends' => [
-            'typo3db_legacy' => '1.0.0-1.0.99',
+            'typo3db_legacy' => '1.0.0-1.1.99',
         ],
     ],
 ```
 
 ## Configuration
 The extension consumes the same 'Default' configuration from TYPO3_CONF_VARS as the
-doctrine based API. The connection is initialized in the extensions ext_localconf.php file.
+doctrine based API. The connection is initialized in the extension's ext_localconf.php file.
 
 ## Current state
 The latest version here reflects a feature-complete state. There are bugs, we know,
 there are possible feature requests - we know. But it's highly likely that this
-extensions gets no new features, unless somebody steps up and continues the development
+extension gets no new features, unless somebody steps up and continues the development
 (see further below).
 
 ## Contribution
