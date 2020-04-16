@@ -8,9 +8,6 @@
 	"require": {
 		"typo3/cms-core": "^9.4"
 	},
-	"replace": {
-		"typo3db_legacy": "*"
-	},
 	"extra": {
 		"typo3/class-alias-loader": {
 			"class-alias-maps": [
