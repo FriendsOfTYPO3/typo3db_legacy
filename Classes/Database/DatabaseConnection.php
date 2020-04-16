@@ -379,7 +379,6 @@ class DatabaseConnection
         $this->logDeprecation();
         $res = $this->exec_SELECTquery($select_fields, $from_table, $where_clause, $groupBy, $orderBy, $limit);
         if ($this->sql_error()) {
-            $this->sql_free_result($res);
             return null;
         }
         $output = [];
