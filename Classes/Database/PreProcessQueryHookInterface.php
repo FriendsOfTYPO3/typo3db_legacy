@@ -29,9 +29,9 @@ interface PreProcessQueryHookInterface
      * @param string $groupBy Group by statement
      * @param string $orderBy Order by statement
      * @param int $limit Database return limit
-     * @param \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject
+     * @param DatabaseConnection $parentObject
      */
-    public function SELECTquery_preProcessAction(&$select_fields, &$from_table, &$where_clause, &$groupBy, &$orderBy, &$limit, \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject);
+    public function SELECTquery_preProcessAction(&$select_fields, &$from_table, &$where_clause, &$groupBy, &$orderBy, &$limit, DatabaseConnection $parentObject);
 
     /**
      * Pre-processor for the INSERTquery method.
@@ -39,9 +39,9 @@ interface PreProcessQueryHookInterface
      * @param string $table Database table name
      * @param array $fieldsValues Field values as key => value pairs
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject
+     * @param DatabaseConnection $parentObject
      */
-    public function INSERTquery_preProcessAction(&$table, array &$fieldsValues, &$noQuoteFields, \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject);
+    public function INSERTquery_preProcessAction(&$table, array &$fieldsValues, &$noQuoteFields, DatabaseConnection $parentObject);
 
     /**
      * Pre-processor for the INSERTmultipleRows method.
@@ -52,9 +52,9 @@ interface PreProcessQueryHookInterface
      * @param array $fields Field names
      * @param array $rows Table rows
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject
+     * @param DatabaseConnection $parentObject
      */
-    public function INSERTmultipleRows_preProcessAction(&$table, array &$fields, array &$rows, &$noQuoteFields, \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject);
+    public function INSERTmultipleRows_preProcessAction(&$table, array &$fields, array &$rows, &$noQuoteFields, DatabaseConnection $parentObject);
 
     /**
      * Pre-processor for the UPDATEquery method.
@@ -63,24 +63,24 @@ interface PreProcessQueryHookInterface
      * @param string $where WHERE clause
      * @param array $fieldsValues Field values as key => value pairs
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject
+     * @param DatabaseConnection $parentObject
      */
-    public function UPDATEquery_preProcessAction(&$table, &$where, array &$fieldsValues, &$noQuoteFields, \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject);
+    public function UPDATEquery_preProcessAction(&$table, &$where, array &$fieldsValues, &$noQuoteFields, DatabaseConnection $parentObject);
 
     /**
      * Pre-processor for the DELETEquery method.
      *
      * @param string $table Database table name
      * @param string $where WHERE clause
-     * @param \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject
+     * @param DatabaseConnection $parentObject
      */
-    public function DELETEquery_preProcessAction(&$table, &$where, \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject);
+    public function DELETEquery_preProcessAction(&$table, &$where, DatabaseConnection $parentObject);
 
     /**
      * Pre-processor for the TRUNCATEquery method.
      *
      * @param string $table Database table name
-     * @param \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject
+     * @param DatabaseConnection $parentObject
      */
-    public function TRUNCATEquery_preProcessAction(&$table, \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection $parentObject);
+    public function TRUNCATEquery_preProcessAction(&$table, DatabaseConnection $parentObject);
 }

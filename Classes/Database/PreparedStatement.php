@@ -167,7 +167,9 @@ class PreparedStatement
      */
     public function __construct($query, $table, array $precompiledQueryParts = [])
     {
-        GeneralUtility::logDeprecatedFunction();
+        trigger_error('DatabaseConnection a.k.a. $["TYPO3_DB"] has been marked as deprecated in'
+            . ' TYPO3 v8 and should be avoided. Please use the newly available ConnectionPool and QueryBuilder'
+            . ' classes.', E_USER_DEPRECATED);
         $this->query = $query;
         $this->precompiledQueryParts = $precompiledQueryParts;
         $this->table = $table;

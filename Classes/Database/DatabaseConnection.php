@@ -14,9 +14,12 @@ namespace TYPO3\CMS\Typo3DbLegacy\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
+use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\TimeTracker\TimeTracker;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
@@ -180,6 +183,16 @@ class DatabaseConnection
      * @var bool
      */
     protected $deprecationWarningThrown = false;
+
+    /**
+     * @var \TYPO3\CMS\Core\Log\Logger
+     */
+    protected $logger;
+
+    public function __construct()
+    {
+        $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
+    }
 
     /**
      * Initialize the database connection
@@ -443,7 +456,7 @@ class DatabaseConnection
         $count = false;
         $resultSet = $this->exec_SELECTquery('COUNT(' . $field . ')', $table, $where);
         if ($resultSet !== false) {
-            list($count) = $this->sql_fetch_row($resultSet);
+            [$count] = $this->sql_fetch_row($resultSet);
             $count = (int)$count;
             $this->sql_free_result($resultSet);
         }
@@ -800,14 +813,13 @@ class DatabaseConnection
      * @param string $orderBy See exec_SELECTquery()
      * @param string $limit See exec_SELECTquery()
      * @param array $input_parameters An array of values with as many elements as there are bound parameters in the SQL statement being executed. All values are treated as \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::PARAM_AUTOTYPE.
-     * @return \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement Prepared statement
+     * @return PreparedStatement Prepared statement
      */
     public function prepare_SELECTquery($select_fields, $from_table, $where_clause, $groupBy = '', $orderBy = '', $limit = '', array $input_parameters = [])
     {
         $this->logDeprecation();
         $query = $this->SELECTquery($select_fields, $from_table, $where_clause, $groupBy, $orderBy, $limit);
-        /** @var $preparedStatement \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement */
-        $preparedStatement = GeneralUtility::makeInstance(\TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::class, $query, $from_table, []);
+        $preparedStatement = GeneralUtility::makeInstance(PreparedStatement::class, $query, $from_table, []);
         // Bind values to parameters
         foreach ($input_parameters as $key => $value) {
             $preparedStatement->bindValue($key, $value, PreparedStatement::PARAM_AUTOTYPE);
@@ -821,7 +833,7 @@ class DatabaseConnection
      *
      * @param array $queryParts Query parts array
      * @param array $input_parameters An array of values with as many elements as there are bound parameters in the SQL statement being executed. All values are treated as \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::PARAM_AUTOTYPE.
-     * @return \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement Prepared statement
+     * @return PreparedStatement Prepared statement
      */
     public function prepare_SELECTqueryArray(array $queryParts, array $input_parameters = [])
     {
@@ -1312,10 +1324,8 @@ class DatabaseConnection
 
             foreach ($this->initializeCommandsAfterConnect as $command) {
                 if ($this->query($command) === false) {
-                    GeneralUtility::sysLog(
-                        'Could not initialize DB connection with query "' . $command . '": ' . $this->sql_error(),
-                        'core',
-                        GeneralUtility::SYSLOG_SEVERITY_ERROR
+                    $this->logger->error(
+                        'Could not initialize DB connection with query "' . $command . '": ' . $this->sql_error()
                     );
                 }
             }
@@ -1324,11 +1334,9 @@ class DatabaseConnection
             // @todo This should raise an exception. Would be useful especially to work during installation.
             $error_msg = $this->link->connect_error;
             $this->link = null;
-            GeneralUtility::sysLog(
+            $this->logger->error(
                 'Could not connect to MySQL server ' . $host . ' with user ' . $this->databaseUsername . ': '
-                . $error_msg,
-                'core',
-                GeneralUtility::SYSLOG_SEVERITY_FATAL
+                . $error_msg
             );
         }
 
@@ -1348,10 +1356,8 @@ class DatabaseConnection
 
         $ret = $this->link->select_db($this->databaseName);
         if (!$ret) {
-            GeneralUtility::sysLog(
-                'Could not select MySQL database ' . $this->databaseName . ': ' . $this->sql_error(),
-                'core',
-                GeneralUtility::SYSLOG_SEVERITY_FATAL
+            $this->logger->critical(
+                'Could not select MySQL database ' . $this->databaseName . ': ' . $this->sql_error()
             );
         }
         return $ret;
@@ -1722,10 +1728,8 @@ class DatabaseConnection
         $sessionResult = $this->sql_query('SHOW SESSION VARIABLES LIKE \'character_set%\'');
 
         if ($sessionResult === false) {
-            GeneralUtility::sysLog(
-                'Error while retrieving the current charset session variables from the database: ' . $this->sql_error(),
-                'core',
-                GeneralUtility::SYSLOG_SEVERITY_ERROR
+            $this->logger->error(
+                'Error while retrieving the current charset session variables from the database: ' . $this->sql_error()
             );
             throw new \RuntimeException(
                 'TYPO3 Fatal Error: Could not determine the current charset of the database.',
@@ -1752,10 +1756,8 @@ class DatabaseConnection
         $hasValidCharset = true;
         foreach ($charsetRequiredVariables as $variableName) {
             if (empty($charsetVariables[$variableName])) {
-                GeneralUtility::sysLog(
-                    'A required session variable is missing in the current MySQL connection: ' . $variableName,
-                    'core',
-                    GeneralUtility::SYSLOG_SEVERITY_ERROR
+                $this->logger->error(
+                    'A required session variable is missing in the current MySQL connection: ' . $variableName
                 );
                 throw new \RuntimeException(
                     'TYPO3 Fatal Error: Could not determine the value of the database session variable: ' . $variableName,
@@ -1839,12 +1841,12 @@ class DatabaseConnection
         $this->logDeprecation();
         $error = $this->sql_error();
         if ($error || (int)$this->debugOutput === 2) {
-            \TYPO3\CMS\Core\Utility\DebugUtility::debug(
+            DebugUtility::debug(
                 [
                     'caller' => \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection::class . '::' . $func,
                     'ERROR' => $error,
                     'lastBuiltQuery' => $query ? $query : $this->debug_lastBuiltQuery,
-                    'debug_backtrace' => \TYPO3\CMS\Core\Utility\DebugUtility::debugTrail()
+                    'debug_backtrace' => DebugUtility::debugTrail()
                 ],
                 $func,
                 is_object($GLOBALS['error']) && @is_callable([$GLOBALS['error'], 'debug'])
@@ -1869,24 +1871,9 @@ class DatabaseConnection
         $trace = debug_backtrace(0);
         array_shift($trace);
         $msg = 'Invalid database result detected: function TYPO3\\CMS\\Typo3DbLegacy\\Database\\DatabaseConnection->'
-            . $trace[0]['function'] . ' called from file ' . substr($trace[0]['file'], (strlen(PATH_site) + 2))
+            . $trace[0]['function'] . ' called from file ' . substr($trace[0]['file'], (strlen(Environment::getPublicPath()) + 3))
             . ' in line ' . $trace[0]['line'] . '.';
-        GeneralUtility::sysLog(
-            $msg . ' Use a devLog extension to get more details.',
-            'core',
-            GeneralUtility::SYSLOG_SEVERITY_ERROR
-        );
-        // Send to devLog if enabled
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_div.php']['devLog'])) {
-            $debugLogData = [
-                'SQL Error' => $this->sql_error(),
-                'Backtrace' => $trace
-            ];
-            if ($this->debug_lastBuiltQuery) {
-                $debugLogData = ['SQL Query' => $this->debug_lastBuiltQuery] + $debugLogData;
-            }
-            GeneralUtility::devLog($msg, 'Core/t3lib_db', 3, $debugLogData);
-        }
+        $this->logger->error($msg, $trace);
         return false;
     }
 
@@ -1921,7 +1908,7 @@ class DatabaseConnection
             return false;
         }
         $error = $this->sql_error();
-        $trail = \TYPO3\CMS\Core\Utility\DebugUtility::debugTrail();
+        $trail = DebugUtility::debugTrail();
         $explain_tables = [];
         $explain_output = [];
         $res = $this->sql_query('EXPLAIN ' . $query, $this->link);
@@ -1970,7 +1957,7 @@ class DatabaseConnection
                     $data['indices'] = $indices_output;
                 }
                 if ($explainMode == 1) {
-                    \TYPO3\CMS\Core\Utility\DebugUtility::debug($data, 'Tables: ' . $from_table, 'DB SQL EXPLAIN');
+                    DebugUtility::debug($data, 'Tables: ' . $from_table, 'DB SQL EXPLAIN');
                 } elseif ($explainMode == 2) {
                     /** @var TimeTracker $timeTracker */
                     $timeTracker = GeneralUtility::makeInstance(TimeTracker::class);
@@ -2014,7 +2001,7 @@ class DatabaseConnection
         if (!$this->deprecationWarningThrown) {
             $this->deprecationWarningThrown = true;
             trigger_error('DatabaseConnection a.k.a. $["TYPO3_DB"] has been marked as deprecated in'
-            . ' TYPO3 v8 and will be removed in TYPO3 v9. Please use the newly available ConnectionPool and QueryBuilder'
+            . ' TYPO3 v8 and should be avoided. Please use the newly available ConnectionPool and QueryBuilder'
             . ' classes.', E_USER_DEPRECATED);
         }
     }
