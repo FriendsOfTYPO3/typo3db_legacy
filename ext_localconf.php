@@ -16,6 +16,10 @@ call_user_func(function () {
     $databaseConnection->setDatabasePassword(
         $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['password'] ?? ''
     );
+    
+    if (isset($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'])) {
+        $databaseConnection->setConnectionCharset($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset']);
+    }
 
     $databaseHost = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['host'] ?? '';
     if (isset($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['port'])) {
