@@ -21,7 +21,7 @@ compatible layer for extensions that still did not move to the new doctrine base
 So those extensions still work with TYPO3 v9.
 
 ## Installation
-The latest version can be installed via TER (http://typo3.org) or via composer
+The latest version can be installed via TER (https://typo3.org) or via composer
 by adding ''composer require friendsoftypo3/typo3db-legacy'' in a TYPO3 v9 installation.
 
 If an extension should be compatible with both TYPO3 v8 and TYPO3 v9 and relies in v9
@@ -78,4 +78,4 @@ published under their respective licenses.
 A lot of contributors have been working on this area while this functionality was part of
 the TYPO3 Core. This package is now maintained by a loose group of TYPO3 enthusiasts inside
 the TYPO3 Community. Feel free to contact Benni Mack (benni.mack@typo3.org) for any questions
-regarding "rtehtmlarea".
+regarding "typo3db_legacy".
