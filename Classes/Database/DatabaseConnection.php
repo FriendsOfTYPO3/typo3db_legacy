@@ -16,6 +16,7 @@ namespace TYPO3\CMS\Typo3DbLegacy\Database;
 
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
+use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\TimeTracker\TimeTracker;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
@@ -1312,11 +1313,7 @@ class DatabaseConnection
 
             foreach ($this->initializeCommandsAfterConnect as $command) {
                 if ($this->query($command) === false) {
-                    GeneralUtility::sysLog(
-                        'Could not initialize DB connection with query "' . $command . '": ' . $this->sql_error(),
-                        'core',
-                        GeneralUtility::SYSLOG_SEVERITY_ERROR
-                    );
+                    $this->logError('Could not initialize DB connection with query "' . $command . '": ' . $this->sql_error());
                 }
             }
             $this->checkConnectionCharset();
@@ -1324,11 +1321,9 @@ class DatabaseConnection
             // @todo This should raise an exception. Would be useful especially to work during installation.
             $error_msg = $this->link->connect_error;
             $this->link = null;
-            GeneralUtility::sysLog(
+            $this->logFatalError(
                 'Could not connect to MySQL server ' . $host . ' with user ' . $this->databaseUsername . ': '
-                . $error_msg,
-                'core',
-                GeneralUtility::SYSLOG_SEVERITY_FATAL
+                . $error_msg
             );
         }
 
@@ -1348,11 +1343,7 @@ class DatabaseConnection
 
         $ret = $this->link->select_db($this->databaseName);
         if (!$ret) {
-            GeneralUtility::sysLog(
-                'Could not select MySQL database ' . $this->databaseName . ': ' . $this->sql_error(),
-                'core',
-                GeneralUtility::SYSLOG_SEVERITY_FATAL
-            );
+            $this->logFatalError('Could not select MySQL database ' . $this->databaseName . ': ' . $this->sql_error());
         }
         return $ret;
     }
@@ -1666,7 +1657,7 @@ class DatabaseConnection
         // Prepare user defined objects (if any) for hooks which extend query methods
         $this->preProcessHookObjects = [];
         $this->postProcessHookObjects = [];
-        if (is_array($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_db.php']['queryProcessors'])) {
+        if (is_array($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_db.php']['queryProcessors'] ?? null)) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_db.php']['queryProcessors'] as $className) {
                 $hookObject = GeneralUtility::makeInstance($className);
                 if (!(
@@ -1722,11 +1713,7 @@ class DatabaseConnection
         $sessionResult = $this->sql_query('SHOW SESSION VARIABLES LIKE \'character_set%\'');
 
         if ($sessionResult === false) {
-            GeneralUtility::sysLog(
-                'Error while retrieving the current charset session variables from the database: ' . $this->sql_error(),
-                'core',
-                GeneralUtility::SYSLOG_SEVERITY_ERROR
-            );
+            $this->logError('Error while retrieving the current charset session variables from the database: ' . $this->sql_error());
             throw new \RuntimeException(
                 'TYPO3 Fatal Error: Could not determine the current charset of the database.',
                 1381847136
@@ -1752,11 +1739,7 @@ class DatabaseConnection
         $hasValidCharset = true;
         foreach ($charsetRequiredVariables as $variableName) {
             if (empty($charsetVariables[$variableName])) {
-                GeneralUtility::sysLog(
-                    'A required session variable is missing in the current MySQL connection: ' . $variableName,
-                    'core',
-                    GeneralUtility::SYSLOG_SEVERITY_ERROR
-                );
+                $this->logError('A required session variable is missing in the current MySQL connection: ' . $variableName);
                 throw new \RuntimeException(
                     'TYPO3 Fatal Error: Could not determine the value of the database session variable: ' . $variableName,
                     1381847779
@@ -1871,11 +1854,7 @@ class DatabaseConnection
         $msg = 'Invalid database result detected: function TYPO3\\CMS\\Typo3DbLegacy\\Database\\DatabaseConnection->'
             . $trace[0]['function'] . ' called from file ' . substr($trace[0]['file'], (strlen(PATH_site) + 2))
             . ' in line ' . $trace[0]['line'] . '.';
-        GeneralUtility::sysLog(
-            $msg . ' Use a devLog extension to get more details.',
-            'core',
-            GeneralUtility::SYSLOG_SEVERITY_ERROR
-        );
+        $this->logError($msg);
         // Send to devLog if enabled
         if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_div.php']['devLog'])) {
             $debugLogData = [
@@ -2016,6 +1995,32 @@ class DatabaseConnection
             trigger_error('DatabaseConnection a.k.a. $["TYPO3_DB"] has been marked as deprecated in'
             . ' TYPO3 v8 and will be removed in TYPO3 v9. Please use the newly available ConnectionPool and QueryBuilder'
             . ' classes.', E_USER_DEPRECATED);
+        }
+    }
+
+    protected function logError($message)
+    {
+        if (method_exists(GeneralUtility::class, 'sysLog')) {
+            GeneralUtility::sysLog(
+                $message,
+                'core',
+                GeneralUtility::SYSLOG_SEVERITY_ERROR
+            );
+        } else {
+            GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__)->error($message);
+        }
+    }
+
+    protected function logFatalError($message)
+    {
+        if (method_exists(GeneralUtility::class, 'sysLog')) {
+            GeneralUtility::sysLog(
+                $message,
+                'core',
+                GeneralUtility::SYSLOG_SEVERITY_FATAL
+            );
+        } else {
+            GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__)->emergency($message);
         }
     }
 }
