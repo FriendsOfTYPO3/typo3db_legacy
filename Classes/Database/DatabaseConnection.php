@@ -14,12 +14,14 @@ namespace TYPO3\CMS\Typo3DbLegacy\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\TimeTracker\TimeTracker;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
+
 
 /**
  * @deprecated  ------------- THE WHOLE CLASS WILL BE REMOVED IN TYPO3 v9 ----------------------------------------------
@@ -1852,7 +1854,7 @@ class DatabaseConnection
         $trace = debug_backtrace(0);
         array_shift($trace);
         $msg = 'Invalid database result detected: function TYPO3\\CMS\\Typo3DbLegacy\\Database\\DatabaseConnection->'
-            . $trace[0]['function'] . ' called from file ' . substr($trace[0]['file'], (strlen(PATH_site) + 2))
+            . $trace[0]['function'] . ' called from file ' . substr($trace[0]['file'], (strlen(Environment::getPublicPath() . '/') + 2))
             . ' in line ' . $trace[0]['line'] . '.';
         $this->logError($msg);
         // Send to devLog if enabled
