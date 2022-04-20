@@ -1,8 +1,13 @@
 {
 	"name": "friendsoftypo3/typo3db-legacy",
 	"type": "typo3-cms-extension",
-	"description": "TYPO3_DB compatibility layer for TYPO3 v9.x",
-	"homepage": "https://typo3.org",
+	"description": "TYPO3_DB compatibility layer",
+	"homepage": "https://extensions.typo3.org/extension/typo3db_legacy",
+	"support": {
+		"docs": "https://docs.typo3.org/p/friendsoftypo3/typo3db-legacy/main/en-us/",
+		"issues": "https://github.com/FriendsOfTYPO3/typo3db_legacy/issues",
+		"source": "https://github.com/FriendsOfTYPO3/typo3db_legacy"
+	},
 	"license": ["GPL-2.0+"],
 
 	"require": {
