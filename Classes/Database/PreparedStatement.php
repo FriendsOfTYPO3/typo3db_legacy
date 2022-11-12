@@ -167,7 +167,11 @@ class PreparedStatement
      */
     public function __construct($query, $table, array $precompiledQueryParts = [])
     {
-        GeneralUtility::logDeprecatedFunction();
+        if (method_exists('GeneralUtility', 'logDeprecatedFunction')) {
+            GeneralUtility::logDeprecatedFunction();
+        } else {
+            trigger_error('PreparedStatement from EXT:typo3db_legacy is marked as deprecated, use Doctrine DBAL as it does PreparedStatements built-in', E_USER_DEPRECATED);
+        }
         $this->query = $query;
         $this->precompiledQueryParts = $precompiledQueryParts;
         $this->table = $table;

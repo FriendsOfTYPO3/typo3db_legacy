@@ -1,7 +1,7 @@
 <?php
 $EM_CONF[$_EXTKEY] = [
-    'title' => 'TYPO3_DB compatibility layer for TYPO3 v9.x',
-    'description' => 'Provides $GLOBALS[\'TYPO3_DB\'] as backwards-compatibility with legacy functionality for extensions that haven\'t fully migrated to doctrine yet.',
+    'title' => 'TYPO3_DB compatibility layer',
+    'description' => 'Provides $GLOBALS[\'TYPO3_DB\'] as backward compatibility with legacy functionality of extensions that are not yet fully migrated to doctrine.',
     'category' => 'be',
     'state' => 'stable',
     'uploadfolder' => 0,
