@@ -1757,8 +1757,8 @@ class DatabaseConnection
         if (!$hasValidCharset) {
             throw new \RuntimeException(
                 'It looks like the character set ' . $this->connectionCharset . ' is not used for this connection even though it is configured as connection charset. ' .
-                'This TYPO3 installation is using the $GLOBALS[\'TYPO3_CONF_VARS\'][\'SYS\'][\'setDBinit\'] property with the following value: "' .
-                $GLOBALS['TYPO3_CONF_VARS']['SYS']['setDBinit'] . '". Please make sure that this command does not overwrite the configured charset. ' .
+                'This TYPO3 installation is using the $GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'Connections\'][\'Default\'][\'charset\'] property with the following value: "' .
+                $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] . '". Please make sure that this command does not overwrite the configured charset. ' .
                 'Please note that for the TYPO3 database everything other than utf8 is unsupported since version 4.7.',
                 1389697515
             );
