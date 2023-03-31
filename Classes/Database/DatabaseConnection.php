@@ -142,7 +142,7 @@ class DatabaseConnection
      *
      * @var string
      */
-    protected $connectionCharset = 'utf8';
+    protected $connectionCharset = 'utf8mb4';
 
     /**
      * @var array List of commands executed after connection was established
@@ -164,7 +164,7 @@ class DatabaseConnection
      *
      * @var string
      */
-    public $default_charset = 'utf8';
+    public $default_charset = 'utf8mb4';
 
     /**
      * @var array<PostProcessQueryHookInterface>
@@ -1610,11 +1610,11 @@ class DatabaseConnection
      * Set the charset that should be used for the MySQL connection.
      * The given value will be passed on to mysqli_set_charset().
      *
-     * The default value of this setting is utf8.
+     * The default value of this setting is utf8mb4.
      *
-     * @param string $connectionCharset The connection charset that will be passed on to mysqli_set_charset() when connecting the database. Default is utf8.
+     * @param string $connectionCharset The connection charset that will be passed on to mysqli_set_charset() when connecting the database. Default is utf8mb4.
      */
-    public function setConnectionCharset($connectionCharset = 'utf8')
+    public function setConnectionCharset($connectionCharset = 'utf8mb4')
     {
         $this->disconnectIfConnected();
         $this->connectionCharset = $connectionCharset;
@@ -1747,7 +1747,15 @@ class DatabaseConnection
                 );
             }
 
-            if ($charsetVariables[$variableName] !== $this->connectionCharset) {
+            if (
+                $charsetVariables[$variableName] !== $this->connectionCharset &&
+                !(
+                    $this->connectionCharset == 'utf8' &&
+                    (
+                        in_array($charsetVariables[$variableName], ['utf8mb3', 'utf8mb4'])
+                    ) 
+                )
+            ) {
                 $hasValidCharset = false;
                 break;
             }
@@ -1755,10 +1763,15 @@ class DatabaseConnection
 
         if (!$hasValidCharset) {
             throw new \RuntimeException(
-                'It looks like the character set ' . $this->connectionCharset . ' is not used for this connection even though it is configured as connection charset. ' .
+                'It looks like the character set "' . $this->connectionCharset . '" is not used for this connection even though it is configured as connection charset. ' .
+                'The charset "' . $charsetVariables[$variableName] . '" is used instead of it. ' . 
                 'This TYPO3 installation is using the $GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'Connections\'][\'Default\'][\'charset\'] property with the following value: "' .
-                $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] . '". Please make sure that this command does not overwrite the configured charset. ' .
-                'Please note that for the TYPO3 database everything other than utf8 is unsupported since version 4.7.',
+                $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] . '". ' . 
+                (
+                    (stripos($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'], 'utf8') !== false) ? 
+                        'Please make sure to configure your utft8 charset variant "' . $charsetVariables[$variableName] . '" .'  : 
+                        'Convert your database. Everything other than utf8mb4 is unsupported.'
+                ),
                 1389697515
             );
         }
