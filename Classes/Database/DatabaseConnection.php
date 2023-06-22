@@ -1298,6 +1298,7 @@ class DatabaseConnection
             'user' => $this->databaseUsername,
             'password' => $this->databaseUserPassword,
             'charset' => $this->connectionCharset,
+            'driverOptions' => $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driverOptions'] ?? [],
         ]);
 
         // Mimic the previous behavior of returning false on connection errors
