@@ -751,7 +751,7 @@ class DatabaseConnection
     {
         $this->logDeprecation();
         $value = (string)$value;
-        if (strpos($value, ',') !== false) {
+        if (str_contains($value, ',')) {
             throw new \InvalidArgumentException('$value must not contain a comma (,) in $this->listQuery() !', 1294585862);
         }
         $pattern = $this->quoteStr($value, $table);
@@ -771,13 +771,10 @@ class DatabaseConnection
     public function searchQuery($searchWords, $fields, $table, $constraint = self::AND_Constraint)
     {
         $this->logDeprecation();
-        switch ($constraint) {
-            case self::OR_Constraint:
-                $constraint = 'OR';
-                break;
-            default:
-                $constraint = 'AND';
-        }
+        $constraint = match ($constraint) {
+            self::OR_Constraint => 'OR',
+            default => 'AND',
+        };
 
         $queryParts = [];
         foreach ($searchWords as $sw) {
@@ -1307,7 +1304,7 @@ class DatabaseConnection
             /** @var \Doctrine\DBAL\Driver\Mysqli\MysqliConnection $mysqliConnection */
             $mysqliConnection = $connection->getWrappedConnection();
             $this->link = $mysqliConnection->getWrappedResourceHandle();
-        } catch (ConnectionException $exception) {
+        } catch (ConnectionException) {
             return false;
         }
 
@@ -1383,7 +1380,7 @@ class DatabaseConnection
                     if ($this->sql_select_db()) {
                         $dbArr[] = $row->SCHEMA_NAME;
                     }
-                } catch (\RuntimeException $exception) {
+                } catch (\RuntimeException) {
                     // The exception happens if we cannot connect to the database
                     // (usually due to missing permissions). This is ok here.
                     // We catch the exception, skip the database and continue.

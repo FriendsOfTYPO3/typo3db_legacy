@@ -29,7 +29,6 @@ interface PostProcessQueryHookInterface
      * @param string $groupBy Group by statement
      * @param string $orderBy Order by statement
      * @param int $limit Database return limit
-     * @param DatabaseConnection $parentObject
      */
     public function exec_SELECTquery_postProcessAction(&$select_fields, &$from_table, &$where_clause, &$groupBy, &$orderBy, &$limit, DatabaseConnection $parentObject);
 
@@ -39,7 +38,6 @@ interface PostProcessQueryHookInterface
      * @param string $table Database table name
      * @param array $fieldsValues Field values as key => value pairs
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param DatabaseConnection $parentObject
      */
     public function exec_INSERTquery_postProcessAction(&$table, array &$fieldsValues, &$noQuoteFields, DatabaseConnection $parentObject);
 
@@ -50,7 +48,6 @@ interface PostProcessQueryHookInterface
      * @param array $fields Field names
      * @param array $rows Table rows
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param DatabaseConnection $parentObject
      */
     public function exec_INSERTmultipleRows_postProcessAction(&$table, array &$fields, array &$rows, &$noQuoteFields, DatabaseConnection $parentObject);
 
@@ -61,7 +58,6 @@ interface PostProcessQueryHookInterface
      * @param string $where WHERE clause
      * @param array $fieldsValues Field values as key => value pairs
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param DatabaseConnection $parentObject
      */
     public function exec_UPDATEquery_postProcessAction(&$table, &$where, array &$fieldsValues, &$noQuoteFields, DatabaseConnection $parentObject);
 
@@ -70,7 +66,6 @@ interface PostProcessQueryHookInterface
      *
      * @param string $table Database table name
      * @param string $where WHERE clause
-     * @param DatabaseConnection $parentObject
      */
     public function exec_DELETEquery_postProcessAction(&$table, &$where, DatabaseConnection $parentObject);
 
@@ -78,7 +73,6 @@ interface PostProcessQueryHookInterface
      * Post-processor for the exec_TRUNCATEquery method.
      *
      * @param string $table Database table name
-     * @param DatabaseConnection $parentObject
      */
     public function exec_TRUNCATEquery_postProcessAction(&$table, DatabaseConnection $parentObject);
 }

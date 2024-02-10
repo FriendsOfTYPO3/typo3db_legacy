@@ -29,7 +29,6 @@ interface PreProcessQueryHookInterface
      * @param string $groupBy Group by statement
      * @param string $orderBy Order by statement
      * @param int $limit Database return limit
-     * @param DatabaseConnection $parentObject
      */
     public function SELECTquery_preProcessAction(&$select_fields, &$from_table, &$where_clause, &$groupBy, &$orderBy, &$limit, DatabaseConnection $parentObject);
 
@@ -39,7 +38,6 @@ interface PreProcessQueryHookInterface
      * @param string $table Database table name
      * @param array $fieldsValues Field values as key => value pairs
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param DatabaseConnection $parentObject
      */
     public function INSERTquery_preProcessAction(&$table, array &$fieldsValues, &$noQuoteFields, DatabaseConnection $parentObject);
 
@@ -52,7 +50,6 @@ interface PreProcessQueryHookInterface
      * @param array $fields Field names
      * @param array $rows Table rows
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param DatabaseConnection $parentObject
      */
     public function INSERTmultipleRows_preProcessAction(&$table, array &$fields, array &$rows, &$noQuoteFields, DatabaseConnection $parentObject);
 
@@ -63,7 +60,6 @@ interface PreProcessQueryHookInterface
      * @param string $where WHERE clause
      * @param array $fieldsValues Field values as key => value pairs
      * @param string|array $noQuoteFields List/array of keys NOT to quote
-     * @param DatabaseConnection $parentObject
      */
     public function UPDATEquery_preProcessAction(&$table, &$where, array &$fieldsValues, &$noQuoteFields, DatabaseConnection $parentObject);
 
@@ -72,7 +68,6 @@ interface PreProcessQueryHookInterface
      *
      * @param string $table Database table name
      * @param string $where WHERE clause
-     * @param DatabaseConnection $parentObject
      */
     public function DELETEquery_preProcessAction(&$table, &$where, DatabaseConnection $parentObject);
 
@@ -80,7 +75,6 @@ interface PreProcessQueryHookInterface
      * Pre-processor for the TRUNCATEquery method.
      *
      * @param string $table Database table name
-     * @param DatabaseConnection $parentObject
      */
     public function TRUNCATEquery_preProcessAction(&$table, DatabaseConnection $parentObject);
 }
