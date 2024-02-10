@@ -42,35 +42,35 @@ class PreparedStatement
      *
      * @var int
      */
-    const PARAM_NULL = 0;
+    public const PARAM_NULL = 0;
 
     /**
      * Represents the SQL INTEGER data type.
      *
      * @var int
      */
-    const PARAM_INT = 1;
+    public const PARAM_INT = 1;
 
     /**
      * Represents the SQL CHAR, VARCHAR, or other string data type.
      *
      * @var int
      */
-    const PARAM_STR = 2;
+    public const PARAM_STR = 2;
 
     /**
      * Represents a boolean data type.
      *
      * @var int
      */
-    const PARAM_BOOL = 3;
+    public const PARAM_BOOL = 3;
 
     /**
      * Automatically detects underlying type
      *
      * @var int
      */
-    const PARAM_AUTOTYPE = 4;
+    public const PARAM_AUTOTYPE = 4;
 
     /**
      * Specifies that the fetch method shall return each row as an array indexed by
@@ -80,7 +80,7 @@ class PreparedStatement
      *
      * @var int
      */
-    const FETCH_ASSOC = 2;
+    public const FETCH_ASSOC = 2;
 
     /**
      * Specifies that the fetch method shall return each row as an array indexed by
@@ -88,7 +88,7 @@ class PreparedStatement
      *
      * @var int
      */
-    const FETCH_NUM = 3;
+    public const FETCH_NUM = 3;
 
     /**
      * Query to be executed.

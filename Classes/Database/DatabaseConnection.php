@@ -59,14 +59,14 @@ class DatabaseConnection
      *
      * @var string
      */
-    const AND_Constraint = 'AND';
+    public const AND_Constraint = 'AND';
 
     /**
      * The OR constraint in where clause
      *
      * @var string
      */
-    const OR_Constraint = 'OR';
+    public const OR_Constraint = 'OR';
 
     /**
      * Set "TRUE" or "1" if you want database errors outputted. Set to "2" if you also want successful database actions outputted.
@@ -447,7 +447,7 @@ class DatabaseConnection
         $count = false;
         $resultSet = $this->exec_SELECTquery('COUNT(' . $field . ')', $table, $where);
         if ($resultSet !== false) {
-            list($count) = $this->sql_fetch_row($resultSet);
+            [$count] = $this->sql_fetch_row($resultSet);
             $count = (int)$count;
             $this->sql_free_result($resultSet);
         }
@@ -1845,10 +1845,7 @@ class DatabaseConnection
                     'lastBuiltQuery' => $query ?: $this->debug_lastBuiltQuery,
                     'debug_backtrace' => DebugUtility::debugTrail()
                 ],
-                $func,
-                is_object($GLOBALS['error']) && @is_callable([$GLOBALS['error'], 'debug'])
-                    ? ''
-                    : 'DB Error'
+                $func
             );
         }
     }
@@ -1919,7 +1916,7 @@ class DatabaseConnection
         $trail = DebugUtility::debugTrail();
         $explain_tables = [];
         $explain_output = [];
-        $res = $this->sql_query('EXPLAIN ' . $query, $this->link);
+        $res = $this->sql_query('EXPLAIN ' . $query);
         if (is_a($res, '\\mysqli_result')) {
             while ($tempRow = $this->sql_fetch_assoc($res)) {
                 $explain_output[] = $tempRow;
@@ -1936,7 +1933,7 @@ class DatabaseConnection
                 $tableRes = $this->sql_query('SHOW TABLE STATUS LIKE \'' . $table . '\'');
                 $isTable = $this->sql_num_rows($tableRes);
                 if ($isTable) {
-                    $res = $this->sql_query('SHOW INDEX FROM ' . $table, $this->link);
+                    $res = $this->sql_query('SHOW INDEX FROM ' . $table);
                     if (is_a($res, '\\mysqli_result')) {
                         while ($tempRow = $this->sql_fetch_assoc($res)) {
                             $indices_output[] = $tempRow;
@@ -1965,7 +1962,7 @@ class DatabaseConnection
                     $data['indices'] = $indices_output;
                 }
                 if ($explainMode == 1) {
-                    DebugUtility::debug($data, 'Tables: ' . $from_table, 'DB SQL EXPLAIN');
+                    DebugUtility::debug($data, 'Tables: ' . $from_table);
                 } elseif ($explainMode == 2) {
                     /** @var TimeTracker $timeTracker */
                     $timeTracker = GeneralUtility::makeInstance(TimeTracker::class);
