@@ -42,35 +42,35 @@ class PreparedStatement
      *
      * @var int
      */
-    const PARAM_NULL = 0;
+    public const PARAM_NULL = 0;
 
     /**
      * Represents the SQL INTEGER data type.
      *
      * @var int
      */
-    const PARAM_INT = 1;
+    public const PARAM_INT = 1;
 
     /**
      * Represents the SQL CHAR, VARCHAR, or other string data type.
      *
      * @var int
      */
-    const PARAM_STR = 2;
+    public const PARAM_STR = 2;
 
     /**
      * Represents a boolean data type.
      *
      * @var int
      */
-    const PARAM_BOOL = 3;
+    public const PARAM_BOOL = 3;
 
     /**
      * Automatically detects underlying type
      *
      * @var int
      */
-    const PARAM_AUTOTYPE = 4;
+    public const PARAM_AUTOTYPE = 4;
 
     /**
      * Specifies that the fetch method shall return each row as an array indexed by
@@ -80,7 +80,7 @@ class PreparedStatement
      *
      * @var int
      */
-    const FETCH_ASSOC = 2;
+    public const FETCH_ASSOC = 2;
 
     /**
      * Specifies that the fetch method shall return each row as an array indexed by
@@ -88,14 +88,7 @@ class PreparedStatement
      *
      * @var int
      */
-    const FETCH_NUM = 3;
-
-    /**
-     * Query to be executed.
-     *
-     * @var string
-     */
-    protected $query;
+    public const FETCH_NUM = 3;
 
     /**
      * Components of the query to be executed.
@@ -103,13 +96,6 @@ class PreparedStatement
      * @var array
      */
     protected $precompiledQueryParts;
-
-    /**
-     * Table (used to call $GLOBALS['TYPO3_DB']->fullQuoteStr().
-     *
-     * @var string
-     */
-    protected $table;
 
     /**
      * Binding parameters.
@@ -165,20 +151,24 @@ class PreparedStatement
      * @access private
      * @deprecated since TYPO3 v8, will be removed in TYPO3 v9, use Doctrine DBAL as it does PreparedStatements built-in
      */
-    public function __construct($query, $table, array $precompiledQueryParts = [])
+    public function __construct(/**
+     * Query to be executed.
+     */
+    protected $query, /**
+     * Table (used to call $GLOBALS['TYPO3_DB']->fullQuoteStr().
+     */
+    protected $table, array $precompiledQueryParts = [])
     {
         if (method_exists('GeneralUtility', 'logDeprecatedFunction')) {
             GeneralUtility::logDeprecatedFunction();
         } else {
             trigger_error('PreparedStatement from EXT:typo3db_legacy is marked as deprecated, use Doctrine DBAL as it does PreparedStatements built-in', E_USER_DEPRECATED);
         }
-        $this->query = $query;
         $this->precompiledQueryParts = $precompiledQueryParts;
-        $this->table = $table;
         $this->parameters = [];
 
         // Test if named placeholders are used
-        if ($this->hasNamedPlaceholders($query) || !empty($precompiledQueryParts)) {
+        if ($this->hasNamedPlaceholders($this->query) || !empty($precompiledQueryParts)) {
             $this->statement = null;
         } else {
             // Only question mark placeholders are used
@@ -241,7 +231,7 @@ class PreparedStatement
      * @return \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement The current prepared statement to allow method chaining
      * @api
      */
-    public function bindValue($parameter, $value, $data_type = self::PARAM_AUTOTYPE)
+    public function bindValue(mixed $parameter, mixed $value, $data_type = self::PARAM_AUTOTYPE)
     {
         switch ($data_type) {
             case self::PARAM_INT:
@@ -556,23 +546,18 @@ class PreparedStatement
      */
     public function setFetchMode($mode)
     {
-        switch ($mode) {
-            case self::FETCH_ASSOC:
-            case self::FETCH_NUM:
-                $this->defaultFetchMode = $mode;
-                break;
-            default:
-                throw new \InvalidArgumentException('$mode must be either TYPO3\\CMS\\Typo3DbLegacy\\Database\\PreparedStatement::FETCH_ASSOC or TYPO3\\CMS\\Typo3DbLegacy\\Database\\PreparedStatement::FETCH_NUM', 1281875340);
-        }
+        $this->defaultFetchMode = match ($mode) {
+            self::FETCH_ASSOC, self::FETCH_NUM => $mode,
+            default => throw new \InvalidArgumentException('$mode must be either TYPO3\\CMS\\Typo3DbLegacy\\Database\\PreparedStatement::FETCH_ASSOC or TYPO3\\CMS\\Typo3DbLegacy\\Database\\PreparedStatement::FETCH_NUM', 1281875340),
+        };
     }
 
     /**
      * Guesses the type of a given value.
      *
-     * @param mixed $value
      * @return int One of the \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::PARAM_* constants
      */
-    protected function guessValueType($value)
+    protected function guessValueType(mixed $value)
     {
         if (is_bool($value)) {
             $type = self::PARAM_BOOL;
@@ -602,8 +587,6 @@ class PreparedStatement
      * Converts named placeholders into question mark placeholders in a query.
      *
      * @param string $query
-     * @param array $parameterValues
-     * @param array $precompiledQueryParts
      */
     protected function convertNamedPlaceholdersToQuestionMarks(&$query, array &$parameterValues, array &$precompiledQueryParts)
     {
@@ -656,7 +639,6 @@ class PreparedStatement
      * Replace the markers with unpredictable token markers.
      *
      * @param string $query
-     * @param array $parameterValues
      * @return string
      * @throws \InvalidArgumentException
      */

@@ -13,7 +13,9 @@ namespace TYPO3\CMS\Typo3DbLegacy\Database;
  *
  * The TYPO3 project - inspiring people to share!
  */
-
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception\ConnectionException;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
@@ -57,14 +59,14 @@ class DatabaseConnection
      *
      * @var string
      */
-    const AND_Constraint = 'AND';
+    public const AND_Constraint = 'AND';
 
     /**
      * The OR constraint in where clause
      *
      * @var string
      */
-    const OR_Constraint = 'OR';
+    public const OR_Constraint = 'OR';
 
     /**
      * Set "TRUE" or "1" if you want database errors outputted. Set to "2" if you also want successful database actions outputted.
@@ -451,7 +453,7 @@ class DatabaseConnection
         $count = false;
         $resultSet = $this->exec_SELECTquery('COUNT(' . $field . ')', $table, $where);
         if ($resultSet !== false) {
-            list($count) = $this->sql_fetch_row($resultSet);
+            [$count] = $this->sql_fetch_row($resultSet);
             $count = (int)$count;
             $this->sql_free_result($resultSet);
         }
@@ -755,7 +757,7 @@ class DatabaseConnection
     {
         $this->logDeprecation();
         $value = (string)$value;
-        if (strpos($value, ',') !== false) {
+        if (str_contains($value, ',')) {
             throw new \InvalidArgumentException('$value must not contain a comma (,) in $this->listQuery() !', 1294585862);
         }
         $pattern = $this->quoteStr($value, $table);
@@ -775,13 +777,10 @@ class DatabaseConnection
     public function searchQuery($searchWords, $fields, $table, $constraint = self::AND_Constraint)
     {
         $this->logDeprecation();
-        switch ($constraint) {
-            case self::OR_Constraint:
-                $constraint = 'OR';
-                break;
-            default:
-                $constraint = 'AND';
-        }
+        $constraint = match ($constraint) {
+            self::OR_Constraint => 'OR',
+            default => 'AND',
+        };
 
         $queryParts = [];
         foreach ($searchWords as $sw) {
@@ -808,14 +807,14 @@ class DatabaseConnection
      * @param string $orderBy See exec_SELECTquery()
      * @param string $limit See exec_SELECTquery()
      * @param array $input_parameters An array of values with as many elements as there are bound parameters in the SQL statement being executed. All values are treated as \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::PARAM_AUTOTYPE.
-     * @return \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement Prepared statement
+     * @return PreparedStatement Prepared statement
      */
     public function prepare_SELECTquery($select_fields, $from_table, $where_clause, $groupBy = '', $orderBy = '', $limit = '', array $input_parameters = [])
     {
         $this->logDeprecation();
         $query = $this->SELECTquery($select_fields, $from_table, $where_clause, $groupBy, $orderBy, $limit);
         /** @var $preparedStatement \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement */
-        $preparedStatement = GeneralUtility::makeInstance(\TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::class, $query, $from_table, []);
+        $preparedStatement = GeneralUtility::makeInstance(PreparedStatement::class, $query, $from_table, []);
         // Bind values to parameters
         foreach ($input_parameters as $key => $value) {
             $preparedStatement->bindValue($key, $value, PreparedStatement::PARAM_AUTOTYPE);
@@ -829,7 +828,7 @@ class DatabaseConnection
      *
      * @param array $queryParts Query parts array
      * @param array $input_parameters An array of values with as many elements as there are bound parameters in the SQL statement being executed. All values are treated as \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement::PARAM_AUTOTYPE.
-     * @return \TYPO3\CMS\Typo3DbLegacy\Database\PreparedStatement Prepared statement
+     * @return PreparedStatement Prepared statement
      */
     public function prepare_SELECTqueryArray(array $queryParts, array $input_parameters = [])
     {
@@ -1295,7 +1294,7 @@ class DatabaseConnection
         // We are not using the TYPO3 CMS shim here as the database parameters in this class
         // are settable externally. This requires building the connection parameter array
         // just in time when establishing the connection.
-        $connection = \Doctrine\DBAL\DriverManager::getConnection([
+        $connection = DriverManager::getConnection([
             'driver' => 'mysqli',
             'wrapperClass' => Connection::class,
             'host' => $host,
@@ -1311,7 +1310,7 @@ class DatabaseConnection
             /** @var \Doctrine\DBAL\Driver\Mysqli\MysqliConnection $mysqliConnection */
             $mysqliConnection = $connection->getWrappedConnection();
             $this->link = $mysqliConnection->getWrappedResourceHandle();
-        } catch (\Doctrine\DBAL\Exception\ConnectionException $exception) {
+        } catch (ConnectionException) {
             return false;
         }
 
@@ -1387,7 +1386,7 @@ class DatabaseConnection
                     if ($this->sql_select_db()) {
                         $dbArr[] = $row->SCHEMA_NAME;
                     }
-                } catch (\RuntimeException $exception) {
+                } catch (\RuntimeException) {
                     // The exception happens if we cannot connect to the database
                     // (usually due to missing permissions). This is ok here.
                     // We catch the exception, skip the database and continue.
@@ -1842,17 +1841,14 @@ class DatabaseConnection
         $this->logDeprecation();
         $error = $this->sql_error();
         if ($error || (int)$this->debugOutput === 2) {
-            \TYPO3\CMS\Core\Utility\DebugUtility::debug(
+            DebugUtility::debug(
                 [
                     'caller' => \TYPO3\CMS\Typo3DbLegacy\Database\DatabaseConnection::class . '::' . $func,
                     'ERROR' => $error,
-                    'lastBuiltQuery' => $query ? $query : $this->debug_lastBuiltQuery,
-                    'debug_backtrace' => \TYPO3\CMS\Core\Utility\DebugUtility::debugTrail()
+                    'lastBuiltQuery' => $query ?: $this->debug_lastBuiltQuery,
+                    'debug_backtrace' => DebugUtility::debugTrail()
                 ],
-                $func,
-                is_object($GLOBALS['error']) && @is_callable([$GLOBALS['error'], 'debug'])
-                    ? ''
-                    : 'DB Error'
+                $func
             );
         }
     }
@@ -1920,10 +1916,10 @@ class DatabaseConnection
             return false;
         }
         $error = $this->sql_error();
-        $trail = \TYPO3\CMS\Core\Utility\DebugUtility::debugTrail();
+        $trail = DebugUtility::debugTrail();
         $explain_tables = [];
         $explain_output = [];
-        $res = $this->sql_query('EXPLAIN ' . $query, $this->link);
+        $res = $this->sql_query('EXPLAIN ' . $query);
         if (is_a($res, '\\mysqli_result')) {
             while ($tempRow = $this->sql_fetch_assoc($res)) {
                 $explain_output[] = $tempRow;
@@ -1940,7 +1936,7 @@ class DatabaseConnection
                 $tableRes = $this->sql_query('SHOW TABLE STATUS LIKE \'' . $table . '\'');
                 $isTable = $this->sql_num_rows($tableRes);
                 if ($isTable) {
-                    $res = $this->sql_query('SHOW INDEX FROM ' . $table, $this->link);
+                    $res = $this->sql_query('SHOW INDEX FROM ' . $table);
                     if (is_a($res, '\\mysqli_result')) {
                         while ($tempRow = $this->sql_fetch_assoc($res)) {
                             $indices_output[] = $tempRow;
@@ -1969,7 +1965,7 @@ class DatabaseConnection
                     $data['indices'] = $indices_output;
                 }
                 if ($explainMode == 1) {
-                    \TYPO3\CMS\Core\Utility\DebugUtility::debug($data, 'Tables: ' . $from_table, 'DB SQL EXPLAIN');
+                    DebugUtility::debug($data, 'Tables: ' . $from_table);
                 } elseif ($explainMode == 2) {
                     /** @var TimeTracker $timeTracker */
                     $timeTracker = GeneralUtility::makeInstance(TimeTracker::class);
@@ -2030,7 +2026,7 @@ class DatabaseConnection
                 GeneralUtility::SYSLOG_SEVERITY_ERROR
             );
         } else {
-            GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__)->error($message);
+            GeneralUtility::makeInstance(LogManager::class)->getLogger(self::class)->error($message);
         }
     }
 
@@ -2043,7 +2039,7 @@ class DatabaseConnection
                 GeneralUtility::SYSLOG_SEVERITY_FATAL
             );
         } else {
-            GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__)->emergency($message);
+            GeneralUtility::makeInstance(LogManager::class)->getLogger(self::class)->emergency($message);
         }
     }
 }

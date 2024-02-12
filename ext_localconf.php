@@ -30,7 +30,7 @@ call_user_func(function ($extensionKey) {
         $databaseConnection->setDatabasePort($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['port']);
     } elseif (strpos($databaseHost, ':') > 0) {
         // @TODO: Find a way to handle this case in the install tool and drop this
-        list($databaseHost, $databasePort) = explode(':', $databaseHost);
+        [$databaseHost, $databasePort] = explode(':', $databaseHost);
         $databaseConnection->setDatabasePort($databasePort);
     }
     if (isset($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['unix_socket'])) {
