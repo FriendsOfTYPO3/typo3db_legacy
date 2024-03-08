@@ -1,7 +1,11 @@
 <?php
 defined('TYPO3') or die();
 
-call_user_func(function () {
+call_user_func(function ($extensionKey) {
+    
+    // The autoloader might not yet be aware of the Classes folder.
+    include_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($extensionKey) . 'Classes/Database/DatabaseConnection.php';
+
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['dbalAndAdodbExtraction']
         = \TYPO3\CMS\Typo3DbLegacy\Updates\DbalAndAdodbExtractionUpdate::class;
 
@@ -67,4 +71,4 @@ call_user_func(function () {
 
     $GLOBALS['TYPO3_DB'] = $databaseConnection;
     $GLOBALS['TYPO3_DB']->initialize();
-});
+}, 'typo3db_legacy');
