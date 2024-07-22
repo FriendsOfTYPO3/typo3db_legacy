@@ -25,8 +25,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
- * @deprecated  ------------- THE WHOLE CLASS WILL BE REMOVED IN TYPO3 v9 ----------------------------------------------
- * DatabaseConnection a.k.a. TYPO3_DB has been superseded by Doctrine DBAL in TYPO3 v8, and will be removed in TYPO3 v9
+ * THE WHOLE CLASS HAS BEEN REMOVED IN TYPO3 v9 ----------------------------------------------
+ * DatabaseConnection a.k.a. TYPO3_DB has been superseded by Doctrine DBAL in TYPO3 v8, and has been removed in TYPO3 v9
  * ---------------------------------------------------------------------------------------------------------------------
  * Contains the class "DatabaseConnection" containing functions for building SQL queries
  * and mysqli wrappers, thus providing a foundational API to all database
@@ -177,6 +177,12 @@ class DatabaseConnection
      * @var array<PreProcessQueryHookInterface>
      */
     protected $postProcessHookObjects = [];
+
+    /**
+     * External property to mark if a deprecation log warning should be thrown.
+     * @var bool
+     */
+    public $deprecationWarningActive = false;
 
     /**
      * Internal property to mark if a deprecation log warning has been thrown in this request
@@ -2000,7 +2006,10 @@ class DatabaseConnection
      */
     protected function logDeprecation()
     {
-        if (!$this->deprecationWarningThrown) {
+        if (
+            $this->deprecationWarningActive &&
+            !$this->deprecationWarningThrown
+        ) {
             $this->deprecationWarningThrown = true;
             trigger_error('DatabaseConnection a.k.a. $["TYPO3_DB"] has been marked as deprecated in'
             . ' TYPO3 v8 and will be removed in TYPO3 v9. Please use the newly available ConnectionPool and QueryBuilder'
