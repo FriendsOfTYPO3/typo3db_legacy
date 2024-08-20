@@ -1303,7 +1303,7 @@ class DatabaseConnection
         try {
             /** @var \Doctrine\DBAL\Connection $sqlConnection */
             $sqlConnection = $connection->getNativeConnection();
-            $this->link = $sqlConnection->getNativeConnection();
+            $this->link = $sqlConnection;
         } catch (ConnectionException) {
             return false;
         }
