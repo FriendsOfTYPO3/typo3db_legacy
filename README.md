@@ -1,7 +1,6 @@
 [![Latest Stable Version](https://poser.pugx.org/friendsoftypo3/typo3db-legacy/v/stable.svg)](https://extensions.typo3.org/extension/typo3db_legacy/)
 [![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg?style=flat-square)](https://get.typo3.org/version/13)
 [![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg?style=flat-square)](https://get.typo3.org/version/12)
-[![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg?style=flat-square)](https://get.typo3.org/version/11)
 [![Total Downloads](https://poser.pugx.org/friendsoftypo3/typo3db-legacy/d/total.svg)](https://packagist.org/packages/friendsoftypo3/typo3db-legacy)
 [![Monthly Downloads](https://poser.pugx.org/friendsoftypo3/typo3db-legacy/d/monthly)](https://packagist.org/packages/friendsoftypo3/typo3db-legacy)
 
