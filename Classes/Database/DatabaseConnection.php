@@ -1301,9 +1301,9 @@ class DatabaseConnection
 
         // Mimic the previous behavior of returning false on connection errors
         try {
-            /** @var \Doctrine\DBAL\Driver\Mysqli\MysqliConnection $mysqliConnection */
-            $mysqliConnection = $connection->getWrappedConnection();
-            $this->link = $mysqliConnection->getWrappedResourceHandle();
+            /** @var \Doctrine\DBAL\Connection $sqlConnection */
+            $sqlConnection = $connection->getNativeConnection();
+            $this->link = $sqlConnection;
         } catch (ConnectionException) {
             return false;
         }
@@ -1752,7 +1752,7 @@ class DatabaseConnection
                     $this->connectionCharset == 'utf8' &&
                     (
                         in_array($charsetVariables[$variableName], ['utf8mb3', 'utf8mb4'])
-                    ) 
+                    )
                 )
             ) {
                 $hasValidCharset = false;
@@ -1763,12 +1763,12 @@ class DatabaseConnection
         if (!$hasValidCharset) {
             throw new \RuntimeException(
                 'It looks like the character set "' . $this->connectionCharset . '" is not used for this connection even though it is configured as connection charset. ' .
-                'The charset "' . $charsetVariables[$variableName] . '" is used instead of it. ' . 
+                'The charset "' . $charsetVariables[$variableName] . '" is used instead of it. ' .
                 'This TYPO3 installation is using the $GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'Connections\'][\'Default\'][\'charset\'] property with the following value: "' .
-                $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] . '". ' . 
+                $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] . '". ' .
                 (
-                    (stripos($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'], 'utf8') !== false) ? 
-                        'Please make sure to configure your utft8 charset variant "' . $charsetVariables[$variableName] . '" .'  : 
+                    (stripos($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'], 'utf8') !== false) ?
+                        'Please make sure to configure your utft8 charset variant "' . $charsetVariables[$variableName] . '" .'  :
                         'Convert your database. Everything other than utf8mb4 is unsupported.'
                 ),
                 1389697515
