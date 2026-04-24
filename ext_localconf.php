@@ -45,8 +45,8 @@ call_user_func(function () {
     }
 
     $isDatabaseHostLocalHost = in_array($databaseHost, ['localhost', '127.0.0.1', '::1'], true);
-    if (isset($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driverOptions'])
-        && $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driverOptions'] & MYSQLI_CLIENT_COMPRESS
+    if (isset($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driverOptions']['flags'])
+        && $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driverOptions']['flags'] & MYSQLI_CLIENT_COMPRESS
         && !$isDatabaseHostLocalHost
     ) {
         $databaseConnection->setConnectionCompression(true);
