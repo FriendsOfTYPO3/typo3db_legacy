@@ -183,7 +183,7 @@ class DatabaseConnection
      * in order to avoid a load of deprecation.
      * @var bool
      */
-    protected $deprecationWarningThrown = false;
+    protected $deprecationWarningThrown = true;
 
     /**
      * Initialize the database connection

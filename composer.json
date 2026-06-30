@@ -1,7 +1,7 @@
 {
 	"name": "friendsoftypo3/typo3db-legacy",
 	"type": "typo3-cms-extension",
-	"description": "TYPO3_DB compatibility layer",
+	"description": "TYPO3_DB compatibility layer - Support the legacy GLOBAL TYPO3_DB queries.",
 	"homepage": "https://extensions.typo3.org/extension/typo3db_legacy",
 	"support": {
 		"docs": "https://docs.typo3.org/p/friendsoftypo3/typo3db-legacy/main/en-us/",
@@ -21,7 +21,8 @@
 			]
 		},
 		"typo3/cms": {
-			"extension-key": "typo3db_legacy"
+			"extension-key": "typo3db_legacy",
+			"version": "1.3.1"
 		}
 	},
 	"autoload": {
